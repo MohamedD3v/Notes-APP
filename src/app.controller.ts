@@ -3,6 +3,9 @@ import { configDotenv } from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import connectDB from "./Database/connection";
+import authRouter from "./Controller/AuthController/auth.routes"
+import userRouter from "./Controller/UserController/user.routes"
 configDotenv({ path: "./.env" });
 const limiter = rateLimit({
   windowMs: 10 * 60 * 1000,
@@ -19,9 +22,12 @@ export const bootstrap = async () => {
   app.use(cors());
   app.use(helmet());
   app.use(limiter);
+  await connectDB();
   app.get("/", (req: Request, res: Response) => {
     return res.status(200).json({ msg: "Welcome to back <3" });
   });
+  app.use("/api/auth",authRouter)
+  app.use("/api/user",userRouter)
   app.all("{/*NULL}", (req: Request, res: Response) => {
     return res.status(404).json({ msg: "Page Not Found!!!" });
   });
